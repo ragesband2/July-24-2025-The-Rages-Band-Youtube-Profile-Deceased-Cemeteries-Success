@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Rages Band - Cemetery Statistics</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #111;
+            color: #fff;
+            margin: 0;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* Flexbox Button with Neon Glow */
+        .neon-button {
+            background: rgba(0, 0, 0, 0.7);
+            color: #fff;
+            border: 2px solid;
+            padding: 15px 30px;
+            font-size: 18px;
+            cursor: pointer;
+            border-radius: 5px;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            margin: 20px 0;
+            z-index: 1;
+        }
+
+        .neon-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: 0.5s;
+            z-index: -1;
+        }
+
+        .neon-button:hover::before {
+            left: 100%;
+        }
+
+        /* Dialog Box */
+        .dialog {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 1380px;
+            height: 600px;
+            background: rgba(0, 0, 0, 0.85);
+            border: 2px solid;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+            z-index: 1000;
+            overflow: auto;
+        }
+
+        .dialog-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            padding-bottom: 10px;
+        }
+
+        .dialog-title {
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            color: #fff;
+            font-size: 24px;
+            cursor: pointer;
+        }
+
+        /* Table Styles */
+        .stats-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            color: #fff;
+        }
+
+        .stats-table th, .stats-table td {
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 12px;
+            text-align: left;
+        }
+
+        .stats-table th {
+            background: rgba(0, 0, 0, 0.5);
+        }
+
+        .stats-table tr:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        /* Scrollbar */
+        .stats-table::-webkit-scrollbar {
+            width: 12px;
+        }
+
+        .stats-table::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.3);
+        }
+
+        .stats-table::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 6px;
+        }
+
+        /* Channel Info */
+        .channel-info {
+            display: flex;
+            margin-top: 20px;
+        }
+
+        .profile-pic {
+            width: 300px;
+            height: 300px;
+            object-fit: cover;
+            border-radius: 5px;
+            margin-right: 20px;
+            animation: hueRotate 5s ease infinite;
+        }
+
+        .channel-stats {
+            flex: 1;
+        }
+
+        /* Video Player */
+        .video-container {
+            margin-top: 20px;
+            width: 100%;
+            height: 400px;
+        }
+
+        .video-container iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        /* Transcripts */
+        .transcript-content {
+            margin-top: 20px;
+            line-height: 1.6;
+        }
+
+        .progress-container {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 20px;
+            background: linear-gradient(90deg, #ff00ff, #00ffff);
+            width: 0%;
+            transition: width 0.5s ease;
+            border-radius: 5px;
+        }
+
+        /* Graph */
+        .graph-container {
+            margin-top: 20px;
+            width: 100%;
+            height: 300px;
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 5px;
+            padding: 10px;
+        }
+
+        .graph-line {
+            stroke: #00ffff;
+            stroke-width: 2;
+            fill: none;
+        }
+
+        .graph-area {
+            fill: url(#gradient);
+            opacity: 0.5;
+        }
+
+        /* Animations */
+        @keyframes hueRotate {
+            0% { filter: hue-rotate(0deg) saturate(1); }
+            50% { filter: hue-rotate(180deg) saturate(2); }
+            100% { filter: hue-rotate(360deg) saturate(1); }
+        }
+
+        @keyframes glow {
+            0% { box-shadow: 0 0 5px rgba(255, 0, 255, 0.7); }
+            50% { box-shadow: 0 0 20px rgba(0, 255, 255, 0.9); }
+            100% { box-shadow: 0 0 5px rgba(255, 0, 255, 0.7); }
+        }
+
+        .neon-button {
+            animation: glow 2s ease-in-out infinite;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <button id="statsButton" class="neon-button">Show Statistics</button>
+        
+        <div class="content">
+            <h1>The Rages Band</h1>
+            <p>I got blah blah matic</p>
+            <div id="liveCount">Live na Bilang ng Deceased Cemeteries: 460,702,201</div>
+            
+            <button id="channelButton" class="neon-button">Visit My Channel</button>
+            <button id="transcriptButton" class="neon-button">Data Transcripts</button>
+        </div>
+    </div>
+
+    <!-- Statistics Dialog -->
+    <div id="statsDialog" class="dialog">
+        <div class="dialog-header">
+            <div class="dialog-title">YouTube Channel Growth Statistics</div>
+            <button class="close-btn">&times;</button>
+        </div>
+        <table class="stats-table">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Deceased Cemeteries Count</th>
+                </tr>
+            </thead>
+            <tbody id="statsTableBody">
+                <!-- Table rows will be added here -->
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Channel Dialog -->
+    <div id="channelDialog" class="dialog">
+        <div class="dialog-header">
+            <div class="dialog-title">Current Channel Statistics</div>
+            <button class="close-btn">&times;</button>
+        </div>
+        <div id="currentDateTime">Current Date: 7/18/2025, 5:15:53 PM</div>
+        <div class="channel-info">
+            <img id="profilePic" class="profile-pic" src="1.png" alt="Profile Picture">
+            <div class="channel-stats">
+                <h2>Live na Bilang ng Deceased Cemeteries:</h2>
+                <div id="channelLiveCount">460,702,201</div>
+                <div class="video-container">
+                    <iframe src="https://www.youtube.com/embed/TA9-5fbVjiI" 
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                            allowfullscreen></iframe>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Transcripts Dialog -->
+    <div id="transcriptDialog" class="dialog">
+        <div class="dialog-header">
+            <div class="dialog-title">Data Transcripts</div>
+            <button class="close-btn">&times;</button>
+        </div>
+        <div class="progress-container">
+            <div id="progressBar" class="progress-bar"></div>
+        </div>
+        <div id="transcriptContent" class="transcript-content">
+            <!-- Transcript content will be added here -->
+        </div>
+    </div>
+
+    <!-- Graph -->
+    <div class="graph-container">
+        <svg id="growthGraph" width="100%" height="100%">
+            <defs>
+                <linearGradient id="gradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" stop-color="#00ffff" stop-opacity="0.8"/>
+                    <stop offset="100%" stop-color="#00ffff" stop-opacity="0"/>
+                </linearGradient>
+            </defs>
+            <g id="graphGroup"></g>
+        </svg>
+    </div>
+
+    <script>
+        // Initialize variables
+        let currentCount = 460702201;
+        let tableData = [];
+        let graphData = [];
+        let isDialogOpen = false;
+        
+        // DOM Elements
+        const statsButton = document.getElementById('statsButton');
+        const channelButton = document.getElementById('channelButton');
+        const transcriptButton = document.getElementById('transcriptButton');
+        const statsDialog = document.getElementById('statsDialog');
+        const channelDialog = document.getElementById('channelDialog');
+        const transcriptDialog = document.getElementById('transcriptDialog');
+        const statsTableBody = document.getElementById('statsTableBody');
+        const liveCount = document.getElementById('liveCount');
+        const channelLiveCount = document.getElementById('channelLiveCount');
+        const currentDateTime = document.getElementById('currentDateTime');
+        const progressBar = document.getElementById('progressBar');
+        const transcriptContent = document.getElementById('transcriptContent');
+        const growthGraph = document.getElementById('growthGraph');
+        const graphGroup = document.getElementById('graphGroup');
+        
+        // Load data from localStorage if available
+        function loadData() {
+            const savedData = localStorage.getItem('cemeteryData');
+            if (savedData) {
+                const data = JSON.parse(savedData);
+                currentCount = data.currentCount || 460702201;
+                tableData = data.tableData || [];
+                graphData = data.graphData || [];
+            }
+        }
+        
+        // Save data to localStorage
+        function saveData() {
+            const data = {
+                currentCount,
+                tableData,
+                graphData
+            };
+            localStorage.setItem('cemeteryData', JSON.stringify(data));
+        }
+        
+        // Update current date and time
+        function updateDateTime() {
+            const now = new Date();
+            currentDateTime.textContent = `Current Date: ${now.toLocaleString()}`;
+        }
+        
+        // Update counters
+        function updateCounters() {
+            currentCount += 1000000;
+            liveCount.textContent = `Live na Bilang ng Deceased Cemeteries: ${currentCount.toLocaleString()}`;
+            channelLiveCount.textContent = currentCount.toLocaleString();
+            
+            // Add new data point
+            const now = new Date();
+            const newData = {
+                date: now.toLocaleString(),
+                count: currentCount
+            };
+            
+            tableData.push(newData);
+            if (tableData.length > 100) tableData.shift(); // Keep only last 100 entries
+            
+            // Update graph data
+            graphData.push({
+                x: now.getTime(),
+                y: currentCount
+            });
+            if (graphData.length > 100) graphData.shift();
+            
+            // Save data
+            saveData();
+            
+            // Update displays
+            updateTable();
+            updateGraph();
+        }
+        
+        // Update statistics table
+        function updateTable() {
+            statsTableBody.innerHTML = '';
+            tableData.forEach(row => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${row.date}</td>
+                    <td>${row.count.toLocaleString()}</td>
+                `;
+                tr.addEventListener('click', () => {
+                    showChannelDialog();
+                });
+                statsTableBody.appendChild(tr);
+            });
+        }
+        
+        // Update growth graph
+        function updateGraph() {
+            const svgWidth = growthGraph.clientWidth;
+            const svgHeight = growthGraph.clientHeight;
+            const padding = 40;
+            
+            // Clear previous graph
+            graphGroup.innerHTML = '';
+            
+            if (graphData.length < 2) return;
+            
+            // Find min/max values
+            const xMin = Math.min(...graphData.map(d => d.x));
+            const xMax = Math.max(...graphData.map(d => d.x));
+            const yMin = Math.min(...graphData.map(d => d.y));
+            const yMax = Math.max(...graphData.map(d => d.y));
+            
+            // Create scales
+            const xScale = (x) => padding + (x - xMin) / (xMax - xMin) * (svgWidth - 2 * padding);
+            const yScale = (y) => svgHeight - padding - (y - yMin) / (yMax - yMin) * (svgHeight - 2 * padding);
+            
+            // Create line path
+            let pathD = '';
+            graphData.forEach((d, i) => {
+                const x = xScale(d.x);
+                const y = yScale(d.y);
+                if (i === 0) pathD += `M ${x} ${y}`;
+                else pathD += ` L ${x} ${y}`;
+            });
+            
+            // Create area path
+            let areaD = '';
+            graphData.forEach((d, i) => {
+                const x = xScale(d.x);
+                const y = yScale(d.y);
+                if (i === 0) areaD += `M ${x} ${y}`;
+                else areaD += ` L ${x} ${y}`;
+            });
+            areaD += ` L ${xScale(xMax)} ${yScale(yMax)} L ${xScale(xMin)} ${yScale(yMax)} Z`;
+            
+            // Add area
+            const area = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            area.setAttribute('d', areaD);
+            area.setAttribute('class', 'graph-area');
+            graphGroup.appendChild(area);
+            
+            // Add line
+            const line = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            line.setAttribute('d', pathD);
+            line.setAttribute('class', 'graph-line');
+            graphGroup.appendChild(line);
+            
+            // Add axes
+            const xAxis = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+            xAxis.setAttribute('x1', padding);
+            xAxis.setAttribute('y1', svgHeight - padding);
+            xAxis.setAttribute('x2', svgWidth - padding);
+            xAxis.setAttribute('y2', svgHeight - padding);
+            xAxis.setAttribute('stroke', 'rgba(255,255,255,0.5)');
+            graphGroup.appendChild(xAxis);
+            
+            const yAxis = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+            yAxis.setAttribute('x1', padding);
+            yAxis.setAttribute('y1', padding);
+            yAxis.setAttribute('x2', padding);
+            yAxis.setAttribute('y2', svgHeight - padding);
+            yAxis.setAttribute('stroke', 'rgba(255,255,255,0.5)');
+            graphGroup.appendChild(yAxis);
+        }
+        
+        // Show channel dialog
+        function showChannelDialog() {
+            channelDialog.style.display = 'block';
+            isDialogOpen = true;
+        }
+        
+        // Show statistics dialog
+        function showStatsDialog() {
+            statsDialog.style.display = 'block';
+            isDialogOpen = true;
+        }
+        
+        // Show transcript dialog
+        function showTranscriptDialog() {
+            transcriptDialog.style.display = 'block';
+            isDialogOpen = true;
+            
+            // Generate transcript content
+            transcriptContent.innerHTML = `
+                <h3>Channel Statistics Transcript</h3>
+                <p>Current Date: ${new Date().toLocaleString()}</p>
+                <p>Live Deceased Cemeteries Count: ${currentCount.toLocaleString()}</p>
+                <p>Months Active: 12</p>
+                <p>Weeks Active: 52</p>
+                <p>Days Active: 365</p>
+                <p>Years Active: 1</p>
+                <p>Hours Online: 8760</p>
+                <p>Minutes Tracked: 525600</p>
+                <p>Seconds Recorded: 31536000</p>
+                <p>Video Count: 142</p>
+                <p>Subscriber Growth: 1,245,678</p>
+                <p>View Count: 918,273,645</p>
+            `;
+            
+            // Animate progress bar
+            let progress = 0;
+            const interval = setInterval(() => {
+                progress += 1;
+                progressBar.style.width = `${progress}%`;
+                if (progress >= 100) clearInterval(interval);
+            }, 50);
+        }
+        
+        // Close all dialogs
+        function closeDialogs() {
+            statsDialog.style.display = 'none';
+            channelDialog.style.display = 'none';
+            transcriptDialog.style.display = 'none';
+            isDialogOpen = false;
+        }
+        
+        // Event Listeners
+        statsButton.addEventListener('click', showStatsDialog);
+        channelButton.addEventListener('click', showChannelDialog);
+        transcriptButton.addEventListener('click', showTranscriptDialog);
+        
+        document.querySelectorAll('.close-btn').forEach(btn => {
+            btn.addEventListener('click', closeDialogs);
+        });
+        
+        // Close dialogs when clicking outside
+        window.addEventListener('click', (e) => {
+            if (isDialogOpen && !e.target.closest('.dialog') && !e.target.closest('.neon-button')) {
+                closeDialogs();
+            }
+        });
+        
+        // Initialize
+        loadData();
+        updateDateTime();
+        updateCounters();
+        updateGraph();
+        
+        // Update every second
+        setInterval(() => {
+            updateDateTime();
+            updateCounters();
+        }, 1000);
+        
+        // Update graph every 5 seconds
+        setInterval(updateGraph, 5000);
+    </script>
+</body>
+</html>
